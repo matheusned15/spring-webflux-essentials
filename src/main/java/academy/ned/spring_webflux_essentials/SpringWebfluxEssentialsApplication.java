@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import reactor.blockhound.BlockHound;
 
 @SpringBootApplication
@@ -21,8 +22,18 @@ public class SpringWebfluxEssentialsApplication {
 	}
 
 	@Bean
-	public GlobalExceptionHandler globalExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ApplicationContext applicationContext) {
-		return new GlobalExceptionHandler(errorAttributes, webProperties, applicationContext);
+	public WebProperties webProperties() {
+		return new WebProperties();
+	}
+
+	@Bean
+	public ServerCodecConfigurer serverCodecConfigurer() {
+		return ServerCodecConfigurer.create();
+	}
+
+	@Bean
+	public GlobalExceptionHandler globalExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ApplicationContext applicationContext, ServerCodecConfigurer serverCodecConfigurer) {
+		return new GlobalExceptionHandler(errorAttributes, webProperties, applicationContext, serverCodecConfigurer);
 	}
 
 }

@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
@@ -19,8 +20,10 @@ import java.util.Map;
 @Order(-2)
 public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 
-    public GlobalExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ApplicationContext applicationContext) {
+    public GlobalExceptionHandler(ErrorAttributes errorAttributes, WebProperties webProperties, ApplicationContext applicationContext, ServerCodecConfigurer serverCodecConfigurer) {
         super(errorAttributes, webProperties.getResources(), applicationContext);
+        this.setMessageWriters(serverCodecConfigurer.getWriters());
+        this.setMessageReaders(serverCodecConfigurer.getReaders());
     }
 
     @Override
@@ -29,12 +32,11 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     }
 
     private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        String query = request.uri().getQuery();
-        ErrorAttributeOptions errorAttributeOptions = isTracedEnabled(query) ? ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE) : ErrorAttributeOptions.defaults();
-        Map<String, Object> errorPropertiesMap = getErrorAttributes(request, errorAttributeOptions);
+        Map<String, Object> errorPropertiesMap = getErrorAttributes(request, ErrorAttributeOptions.defaults());
         ServerResponse.BodyBuilder responseBuilder = ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
         return responseBuilder.contentType(MediaType.APPLICATION_JSON).bodyValue(errorPropertiesMap);
     }
+
 
     private boolean isTracedEnabled(String query){
         return !StringUtils.isEmpty(query) && query.contains("trace=true");
