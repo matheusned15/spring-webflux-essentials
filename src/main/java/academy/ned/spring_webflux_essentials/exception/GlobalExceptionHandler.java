@@ -1,5 +1,6 @@
 package academy.ned.spring_webflux_essentials.exception;
 
+import io.micrometer.common.util.StringUtils;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -28,9 +29,15 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     }
 
     private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-        Map<String, Object> errorPropertiesMap = getErrorAttributes(request, ErrorAttributeOptions.defaults());
+        String query = request.uri().getQuery();
+        ErrorAttributeOptions errorAttributeOptions = isTracedEnabled(query) ? ErrorAttributeOptions.of(ErrorAttributeOptions.Include.STACK_TRACE) : ErrorAttributeOptions.defaults();
+        Map<String, Object> errorPropertiesMap = getErrorAttributes(request, errorAttributeOptions);
         ServerResponse.BodyBuilder responseBuilder = ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR);
         return responseBuilder.contentType(MediaType.APPLICATION_JSON).bodyValue(errorPropertiesMap);
+    }
+
+    private boolean isTracedEnabled(String query){
+        return !StringUtils.isEmpty(query) && query.contains("trace=true");
     }
 }
 
