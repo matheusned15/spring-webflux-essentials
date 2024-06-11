@@ -62,6 +62,15 @@ class AnimeControllerTest {
         BDDMockito.when(animeServiceMock.findById(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.just(anime));
 
+        BDDMockito.when(animeServiceMock.save(AnimeCreator.createAnimeToBeSaved()))
+                .thenReturn(Mono.just(anime));
+
+        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.empty());
+
+        BDDMockito.when(animeServiceMock.update(AnimeCreator.createAnimeValidAnime()))
+                .thenReturn(Mono.empty());
+
     }
 
     @Test
@@ -82,4 +91,31 @@ class AnimeControllerTest {
                 .verifyComplete();
     }
 
+    @Test
+    @DisplayName("save creates anm anime when successful")
+    public void save_CreatesAnime_WhenSuccessful() {
+        Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+        StepVerifier.create(animeController.save(animeToBeSaved))
+                .expectSubscription()
+                .expectNext(anime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("delete removes the anime when successful")
+    public void delete_RemovesAnime_WhenSuccessful() {
+        StepVerifier.create(animeController.delete(1))
+                .expectSubscription()
+                .verifyComplete();
+    }
+
+
+    @Test
+    @DisplayName("update save updated anime and returns empty mono when sucessful")
+    public void update_SaveUpdatedAnime_WhenSuccessful() {
+        StepVerifier.create(animeController.update(1 ,AnimeCreator.createAnimeValidAnime()))
+                .expectSubscription()
+                .verifyComplete();
+    }
 }
