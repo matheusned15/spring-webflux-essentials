@@ -153,6 +153,4 @@ class AnimeServiceTest {
                 .expectError(ResponseStatusException.class)
                 .verify();
     }
-
-
 }
