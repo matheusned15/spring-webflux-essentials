@@ -14,7 +14,7 @@ import reactor.blockhound.BlockHound;
 public class SpringWebfluxEssentialsApplication {
 
 	static {
-		BlockHound.install();
+		BlockHound.install(builder -> builder.allowBlockingCallsInside("java.util.UUID", "randomUUID"));
 	}
 
 	public static void main(String[] args) {
