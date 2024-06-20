@@ -1,8 +1,11 @@
 package academy.ned.spring_webflux_essentials.config;
 
+import academy.ned.spring_webflux_essentials.service.AppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
@@ -33,18 +36,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public MapReactiveUserDetailsService userDetailsService(){
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
-        UserDetails user = User.withUsername("user")
-                .password(passwordEncoder.encode("king"))
-                .roles("USER")
-                .build();
-
-        UserDetails admin = User.withUsername("admin")
-                .password(passwordEncoder.encode("king"))
-                .roles("USER","ADMIN")
-                .build();
-        return new MapReactiveUserDetailsService(user, admin);
+    ReactiveAuthenticationManager authenticationManager(AppUserDetailsService userDetailsService){
+        return new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
     }
 }
